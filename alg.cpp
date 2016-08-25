@@ -100,7 +100,7 @@ int executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height
 
   // Get ID for the device
   cl_device_type device_type = use_gpu ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU;
-  clGetDeviceIDs(cpPlatform, device_type, 1, &device_id, NULL);
+  clGetDeviceIDs(cpPlatform, device_type, 2, &device_id, NULL);
 
   // Create a context
   context = clCreateContext(0, 1, &device_id, NULL, NULL, NULL);
@@ -157,7 +157,7 @@ int executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height
   size_t local[2] = {1, 1};
 
   // Execute the kernel over the entire range of the data set
-  clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
+  clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, local, 0, NULL, NULL);
 
   // Wait for the command queue to get serviced before reading back results
   clFinish(queue);
@@ -199,9 +199,9 @@ int executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height
 
 int main( int argc, char** argv)
 {
-  if(argc < 5){
-    throw std::invalid_argument("Matrix Multiplication requires CPU/GPU choice and 3 size arguments.");
-  }
+  //if(argc < 5){
+  //  throw std::invalid_argument("Matrix Multiplication requires CPU/GPU choice and 3 size arguments.");
+  //}
 
   bool use_gpu = atoi(argv[1]) == 1;
   unsigned int width_matrix_a = atoi(argv[2]);
