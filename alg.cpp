@@ -43,7 +43,7 @@ const char *kernelSource =                                      "\n" \
 "}                                                               \n" \
                                                                 "\n" ;
 
-int executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height_matrix_a, unsigned int width_matrix_b){
+double executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height_matrix_a, unsigned int width_matrix_b){
   // Device input buffers
   cl_mem d_a;
   cl_mem d_b;
@@ -154,7 +154,7 @@ int executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height
   size_t y_range = height_matrix_a * local_size;
   size_t x_range = width_matrix_b * local_size;
   size_t global[2] = {y_range, x_range};
-  size_t local[2] = {1, 1};
+  size_t local[2] = {500, 500};
 
   // Execute the kernel over the entire range of the data set
   clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, local, 0, NULL, NULL);
@@ -176,9 +176,6 @@ int executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height
   //     cout << endl;
   // }
 
-  cout << result_matrix[height_matrix_a * width_matrix_b - 1] << endl;
-  cout << "Elapsed Time: " << (double)duration / CLOCKS_PER_SEC  << endl;
-
   // release OpenCL resources
   clReleaseMemObject(d_a);
   clReleaseMemObject(d_b);
@@ -193,24 +190,5 @@ int executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height
   free(matrix_b);
   free(result_matrix);
 
-  return 0;
-}
-
-
-int main( int argc, char** argv)
-{
-  //if(argc < 5){
-  //  throw std::invalid_argument("Matrix Multiplication requires CPU/GPU choice and 3 size arguments.");
-  //}
-
-  bool use_gpu = atoi(argv[1]) == 1;
-  unsigned int width_matrix_a = atoi(argv[2]);
-  unsigned int height_matrix_a = atoi(argv[3]);
-  unsigned int width_matrix_b = atoi(argv[4]);
-
-  cout << width_matrix_a << endl;
-  cout << height_matrix_a << endl;
-  cout << width_matrix_b << endl;
-
-  executeKernel(use_gpu, width_matrix_a, height_matrix_a, width_matrix_b);
+  return (double)duration / CLOCKS_PER_SEC;
 }

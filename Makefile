@@ -13,6 +13,8 @@ endif
 
 $(info OpenCL Link Command is: $(OPEN_CL_LINK))
 
+bmark:
+	$(CC) $(KERNEL_DIM) $(CC_FLAGS) $(OPEN_CL_LINK) benchmark.cpp -g -o benchmark
 
 all:
 	$(CC) $(KERNEL_DIM) $(CC_FLAGS) $(OPEN_CL_LINK) alg.cpp -g -o alg
