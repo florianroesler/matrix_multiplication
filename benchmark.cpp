@@ -17,6 +17,8 @@ using namespace std;
 
 int main( int argc, char** argv)
 {
+  cout << "Arguments: MinSize, MaxSize, StepSize, Iterations, GPU Bit" << endl << std::flush;
+
   unsigned int min_size = atoi(argv[1]);
   unsigned int max_size = atoi(argv[2]);
   unsigned int step_size = atoi(argv[3]);
