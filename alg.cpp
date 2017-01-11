@@ -43,7 +43,7 @@ const char *kernelSource =                                      "\n" \
 "}                                                               \n" \
                                                                 "\n" ;
 
-double executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int height_matrix_a, unsigned int width_matrix_b){
+double executeKernel(bool use_gpu, double* matrix_a, double* matrix_b, unsigned int size){
   // Device input buffers
   cl_mem d_a;
   cl_mem d_b;
@@ -64,34 +64,11 @@ double executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int hei
   size_t programSize; size_t logSize;
 
   // Initialize matrices on host
-  unsigned int height_matrix_b = width_matrix_a;
+  double* result_matrix = new double[size * size];
 
-  double* matrix_a = new double[width_matrix_a * height_matrix_a];
-  double* matrix_b = new double[width_matrix_b * height_matrix_b];
-  double* result_matrix = new double[height_matrix_a * width_matrix_b];
-
-  int i;
-  int j;
-
-  for(i = 0; i < height_matrix_a; i++)
-  {
-    for(j = 0; j < width_matrix_a; j++)
-    {
-      matrix_a[i * width_matrix_a + j] = randMToN(1, 3);
-    }
-  }
-
-  for(i = 0; i < height_matrix_b; i++)
-  {
-    for(j = 0; j < width_matrix_b; j++)
-    {
-      matrix_b[i * width_matrix_b + j] = randMToN(1, 3);
-    }
-  }
-
-  size_t bytes_matrix_a = height_matrix_a * width_matrix_a * sizeof(double);
-  size_t bytes_matrix_b = height_matrix_b * width_matrix_b * sizeof(double);
-  size_t bytes_result_matrix = height_matrix_a * width_matrix_b * sizeof(double);
+  size_t bytes_matrix_a = size * size * sizeof(double);
+  size_t bytes_matrix_b = size * size * sizeof(double);
+  size_t bytes_result_matrix = size * size * sizeof(double);
 
   high_resolution_clock::time_point begin = high_resolution_clock::now();
 
@@ -147,12 +124,11 @@ double executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int hei
   clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_a);
   clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_b);
   clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_c);
-  clSetKernelArg(kernel, 3, sizeof(unsigned int), &width_matrix_a);
-  clSetKernelArg(kernel, 4, sizeof(unsigned int), &width_matrix_b);
+  clSetKernelArg(kernel, 3, sizeof(unsigned int), &size);
+  clSetKernelArg(kernel, 4, sizeof(unsigned int), &size);
 
-  size_t local_size = 1;
-  size_t y_range = height_matrix_a * local_size;
-  size_t x_range = width_matrix_b * local_size;
+  size_t y_range = size;
+  size_t x_range = size;
   size_t global[2] = {y_range, x_range};
   size_t local[2] = {500, 500};
 
@@ -169,13 +145,6 @@ double executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int hei
 
   long duration = duration_cast<microseconds>( end - begin ).count();
 
-  // for(i = 0; i < height_matrix_a * width_matrix_b; i++)
-  // {
-  //   cout << result_matrix[i] << "\t";
-  //   if((i + 1) % width_matrix_b == 0)
-  //     cout << endl;
-  // }
-
   // release OpenCL resources
   clReleaseMemObject(d_a);
   clReleaseMemObject(d_b);
@@ -186,8 +155,6 @@ double executeKernel(bool use_gpu, unsigned int width_matrix_a, unsigned int hei
   clReleaseContext(context);
 
   //release host memory
-  free(matrix_a);
-  free(matrix_b);
   free(result_matrix);
 
   return (double)duration / CLOCKS_PER_SEC;

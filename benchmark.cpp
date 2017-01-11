@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "alg.cpp"
+#include "matrix_generator.cpp"
 
 using namespace std;
 
@@ -25,12 +26,12 @@ int main( int argc, char** argv)
 
   for(int size=min_size; size<=max_size; size+=step_size){
     vector<double> results;
-
+    double* array = generate(size, size);
     for(int i=0; i<iterations; i++){
-      double r = executeKernel(use_gpu, size, size, size);
+      double r = executeKernel(use_gpu, array, array, size);
       results.push_back(r);
     }
-
+    free(array);
     double sum = accumulate(results.begin(), results.end(), 0.0);
     double mean = sum / results.size();
     double sq_sum = inner_product(results.begin(), results.end(), results.begin(), 0.0);
