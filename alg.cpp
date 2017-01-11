@@ -19,22 +19,22 @@ using namespace std;
 using namespace std::chrono;
 
 
-double randMToN(double M, double N)
+float randMToN(float M, float N)
 {
     return M + (rand() / ( RAND_MAX / (N-M) ) ) ;
 }
 
 const char *kernelSource =                                      "\n" \
 "#pragma OPENCL EXTENSION cl_khr_fp64 : enable                    \n" \
-"__kernel void matrix_multiplication(  __global double *a,                       \n" \
-"                       __global double *b,                       \n" \
-"                       __global double *c,                       \n" \
+"__kernel void matrix_multiplication(  __global float *a,                       \n" \
+"                       __global float *b,                       \n" \
+"                       __global float *c,                       \n" \
 "                       const unsigned int width_a,                   \n" \
 "                       const unsigned int width_b)                    \n" \
 "{                                                      \n" \
 "    int y = get_global_id(0);                                  \n" \
 "    int x = get_global_id(1);                                  \n" \
-"    double sum = 0; \n"\
+"    float sum = 0; \n"\
 "    for(int index = 0; index < width_a; index++){ \n"\
 "       sum += a[y * width_a + index] * b[index * width_b + x]; \n"\
 "    }  \n"\
@@ -43,7 +43,7 @@ const char *kernelSource =                                      "\n" \
 "}                                                               \n" \
                                                                 "\n" ;
 
-double executeKernel(bool use_gpu, double* matrix_a, double* matrix_b, unsigned int size){
+double executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int size){
   // Device input buffers
   cl_mem d_a;
   cl_mem d_b;
@@ -64,11 +64,11 @@ double executeKernel(bool use_gpu, double* matrix_a, double* matrix_b, unsigned 
   size_t programSize; size_t logSize;
 
   // Initialize matrices on host
-  double* result_matrix = new double[size * size];
+  float* result_matrix = new float[size * size];
 
-  size_t bytes_matrix_a = size * size * sizeof(double);
-  size_t bytes_matrix_b = size * size * sizeof(double);
-  size_t bytes_result_matrix = size * size * sizeof(double);
+  size_t bytes_matrix_a = size * size * sizeof(float);
+  size_t bytes_matrix_b = size * size * sizeof(float);
+  size_t bytes_result_matrix = size * size * sizeof(float);
 
   high_resolution_clock::time_point begin = high_resolution_clock::now();
 

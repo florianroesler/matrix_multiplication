@@ -1,8 +1,8 @@
 
 
-double* generate(unsigned int height, unsigned int width){
+float* generate(unsigned int height, unsigned int width){
   int i, j;
-  double* matrix = new double[height * width];
+  float* matrix = new float[height * width];
   for(i = 0; i < height; i++)
   {
     for(j = 0; j < width; j++)

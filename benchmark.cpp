@@ -27,8 +27,8 @@ int main( int argc, char** argv)
   bool use_gpu = atoi(argv[5]) == 1;
 
   for(int size=min_size; size<=max_size; size+=step_size){
-    vector<double> results;
-    double* array = generate(size, size);
+    vector<float> results;
+    float* array = generate(size, size);
     for(int i=0; i<iterations; i++){
       double r = executeKernel(use_gpu, array, array, size);
       results.push_back(r);
