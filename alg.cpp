@@ -130,7 +130,7 @@ double executeKernel(bool use_gpu, double* matrix_a, double* matrix_b, unsigned 
   size_t y_range = size;
   size_t x_range = size;
   size_t global[2] = {y_range, x_range};
-  size_t local[2] = {500, 500};
+  size_t local[2] = {NULL, NULL};
 
   // Execute the kernel over the entire range of the data set
   clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, local, 0, NULL, NULL);
