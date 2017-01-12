@@ -26,6 +26,8 @@ float randMToN(float M, float N)
 
 const char *kernelSource =                                      "\n" \
 "#pragma OPENCL EXTENSION cl_khr_fp64 : enable                    \n" \
+"#pragma OPENCL EXTENSION cl_intel_printf : enable                \n" \
+"#pragma OPENCL EXTENSION cl_amd_printf : enable               \n" \
 "__kernel void matrix_multiplication(  __global float *a,                       \n" \
 "                       __global float *b,                       \n" \
 "                       __global float *c,                       \n" \
@@ -38,7 +40,8 @@ const char *kernelSource =                                      "\n" \
 "    for(int index = 0; index < width_a; index++){ \n"\
 "       sum += a[y * width_a + index] * b[index * width_b + x]; \n"\
 "    }  \n"\
-"    //printf(\"%d %f \\n\", width_b * y + x, sum); \n"\
+"   printf(\"TEST\"); \n"\
+"    printf(\"%d %f \\n\", width_b * y + x, sum); \n"\
 "    c[width_b * y + x] = sum;                \n" \
 "}                                                               \n" \
                                                                 "\n" ;
@@ -153,6 +156,10 @@ void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int 
   clReleaseKernel(kernel);
   clReleaseCommandQueue(queue);
   clReleaseContext(context);
+
+  for(int i = 0; i<size;i++){
+    cout << result_matrix[i] << endl;
+  }
 
   long duration = duration_cast<microseconds>( end - begin ).count() * 1000;
 
