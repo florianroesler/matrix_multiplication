@@ -83,7 +83,7 @@ double executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned in
   context = clCreateContext(0, 1, &device_id, NULL, NULL, NULL);
 
   // Create a command queue
-  queue = clCreateCommandQueue(context, device_id, 0, NULL);
+  queue = clCreateCommandQueue(context, device_id, CL_QUEUE_PROFILING_ENABLE, NULL);
 
   // Create the compute program from the source buffer
   program = clCreateProgramWithSource(context, 1, (const char **) & kernelSource, NULL, NULL);
@@ -116,9 +116,24 @@ double executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned in
   d_b = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes_matrix_b, NULL, NULL);
   d_c = clCreateBuffer(context, CL_MEM_WRITE_ONLY, bytes_result_matrix, NULL, NULL);
 
+  cl_event event;
+
+  cl_ulong time_start, time_end;
+  double total_time;
   // Write our data set into the input array in device memory
-  clEnqueueWriteBuffer(queue, d_a, CL_TRUE, 0, bytes_matrix_a, matrix_a, 0, NULL, NULL);
-  clEnqueueWriteBuffer(queue, d_b, CL_TRUE, 0, bytes_matrix_b, matrix_b, 0, NULL, NULL);
+  clEnqueueWriteBuffer(queue, d_a, CL_FALSE, 0, bytes_matrix_a, matrix_a, 0, NULL, &event);
+
+  clWaitForEvents(1 , &event);
+  clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+  clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+  total_time = time_end - time_start;
+
+  cout << time_start << endl;
+
+  cout << time_end << endl;
+  printf("\nExecution time in milliseconds = %0.3f ms\n", (total_time / 1000000.0) );
+
+  clEnqueueWriteBuffer(queue, d_b, CL_FALSE, 0, bytes_matrix_b, matrix_b, 0, NULL, NULL);
 
   // Set the arguments to our compute kernel
   clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_a);
