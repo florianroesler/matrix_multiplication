@@ -43,7 +43,7 @@ const char *kernelSource =                                      "\n" \
 "}                                                               \n" \
                                                                 "\n" ;
 
-double executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int size){
+void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int size, double *results){
   // Device input buffers
   cl_mem d_a;
   cl_mem d_b;
@@ -116,24 +116,12 @@ double executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned in
   d_b = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes_matrix_b, NULL, NULL);
   d_c = clCreateBuffer(context, CL_MEM_WRITE_ONLY, bytes_result_matrix, NULL, NULL);
 
-  cl_event event;
+  cl_event buffer_a_event, buffer_b_event, buffer_c_event;
 
-  cl_ulong time_start, time_end;
-  double total_time;
+
   // Write our data set into the input array in device memory
-  clEnqueueWriteBuffer(queue, d_a, CL_FALSE, 0, bytes_matrix_a, matrix_a, 0, NULL, &event);
-
-  clWaitForEvents(1 , &event);
-  clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
-  clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
-  total_time = time_end - time_start;
-
-  cout << time_start << endl;
-
-  cout << time_end << endl;
-  printf("\nExecution time in milliseconds = %0.3f ms\n", (total_time / 1000000.0) );
-
-  clEnqueueWriteBuffer(queue, d_b, CL_FALSE, 0, bytes_matrix_b, matrix_b, 0, NULL, NULL);
+  clEnqueueWriteBuffer(queue, d_a, CL_TRUE, 0, bytes_matrix_a, matrix_a, 0, NULL, &buffer_a_event);
+  clEnqueueWriteBuffer(queue, d_b, CL_TRUE, 0, bytes_matrix_b, matrix_b, 0, NULL, &buffer_b_event);
 
   // Set the arguments to our compute kernel
   clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_a);
@@ -154,12 +142,9 @@ double executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned in
   clFinish(queue);
 
   // Read the results from the device
-  clEnqueueReadBuffer(queue, d_c, CL_TRUE, 0, bytes_result_matrix, result_matrix, 0, NULL, NULL );
+  clEnqueueReadBuffer(queue, d_c, CL_TRUE, 0, bytes_result_matrix, result_matrix, 0, NULL, &buffer_c_event);
 
   high_resolution_clock::time_point end = high_resolution_clock::now();
-
-  long duration = duration_cast<microseconds>( end - begin ).count();
-
   // release OpenCL resources
   clReleaseMemObject(d_a);
   clReleaseMemObject(d_b);
@@ -169,8 +154,28 @@ double executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned in
   clReleaseCommandQueue(queue);
   clReleaseContext(context);
 
+  long duration = duration_cast<microseconds>( end - begin ).count() * 1000;
+
   //release host memory
   free(result_matrix);
 
-  return (double)duration / CLOCKS_PER_SEC;
+  cl_ulong time_start, time_end;
+  double buffer_a_time, buffer_b_time, buffer_c_time;
+
+  clGetEventProfilingInfo(buffer_a_event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+  clGetEventProfilingInfo(buffer_a_event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+  buffer_a_time = (time_end - time_start) / 1000000.0;
+
+  clGetEventProfilingInfo(buffer_b_event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+  clGetEventProfilingInfo(buffer_b_event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+  buffer_b_time = (time_end - time_start) / 1000000.0;
+
+  clGetEventProfilingInfo(buffer_c_event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+  clGetEventProfilingInfo(buffer_c_event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+  buffer_c_time = (time_end - time_start) / 1000000.0;
+
+  results[0] = (double)duration / CLOCKS_PER_SEC;
+  results[1] = buffer_a_time;
+  results[2] = buffer_b_time;
+  results[3] = buffer_c_time;
 }

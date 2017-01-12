@@ -15,6 +15,21 @@
 
 using namespace std;
 
+
+double calcMean(vector<float> results){
+  double sum = accumulate(results.begin(), results.end(), 0.0);
+  double mean = sum / results.size();
+
+  return mean;
+}
+
+double calcStdev(vector<float> results){
+  double mean = calcMean(results);
+  double sq_sum = inner_product(results.begin(), results.end(), results.begin(), 0.0);
+  double stdev = sqrt(sq_sum / results.size() - mean * mean);
+  return stdev;
+}
+
 int main( int argc, char** argv)
 {
   cout << "Arguments: MinSize, MaxSize, StepSize, Iterations, GPU Bit" << endl << std::flush;
@@ -28,19 +43,35 @@ int main( int argc, char** argv)
 
   for(int size=min_size; size<=max_size; size+=step_size){
     vector<float> results;
+    vector<float> buffer_a;
+    vector<float> buffer_b;
+    vector<float> buffer_c;
+
     float* array = generate(size, size);
     for(int i=0; i<iterations; i++){
-      double r = executeKernel(use_gpu, array, array, size);
-      results.push_back(r);
+      double *r = new double[4];
+      executeKernel(use_gpu, array, array, size, r);
+      results.push_back(r[0]);
+      buffer_a.push_back(r[1]);
+      buffer_b.push_back(r[2]);
+      buffer_c.push_back(r[3]);
     }
     free(array);
-    double sum = accumulate(results.begin(), results.end(), 0.0);
-    double mean = sum / results.size();
-    double sq_sum = inner_product(results.begin(), results.end(), results.begin(), 0.0);
-    double stdev = sqrt(sq_sum / results.size() - mean * mean);
 
+    double mean = calcMean(results);
+    double stdev = calcStdev(results);
     cout << size << ": avg=" << mean << "; stdev=" << stdev << endl;
+
+    mean = calcMean(buffer_a);
+    stdev = calcStdev(buffer_a);
+    cout << "Buffer A: avg=" << mean << "; stdev=" << stdev << endl;
+
+    mean = calcMean(buffer_b);
+    stdev = calcStdev(buffer_b);
+    cout << "Buffer B: avg=" << mean << "; stdev=" << stdev << endl;
+
+    mean = calcMean(buffer_c);
+    stdev = calcStdev(buffer_c);
+    cout << "Buffer C: avg=" << mean << "; stdev=" << stdev << endl;
   }
-
-
 }
