@@ -40,8 +40,7 @@ const char *kernelSource =                                      "\n" \
 "    for(int index = 0; index < width_a; index++){ \n"\
 "       sum += a[y * width_a + index] * b[index * width_b + x]; \n"\
 "    }  \n"\
-"   printf(\"TEST\"); \n"\
-"    printf(\"%d %f \\n\", width_b * y + x, sum); \n"\
+"    //printf(\"%d %f \\n\", width_b * y + x, sum); \n"\
 "    c[width_b * y + x] = sum;                \n" \
 "}                                                               \n" \
                                                                 "\n" ;
@@ -136,10 +135,9 @@ void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int 
   size_t y_range = size;
   size_t x_range = size;
   size_t global[2] = {y_range, x_range};
-  size_t local[2] = {NULL, NULL};
 
   // Execute the kernel over the entire range of the data set
-  clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, local, 0, NULL, NULL);
+  clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, NULL, 0, NULL, NULL);
 
   // Wait for the command queue to get serviced before reading back results
   clFinish(queue);
@@ -158,7 +156,7 @@ void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int 
   clReleaseContext(context);
 
   for(int i = 0; i<size;i++){
-    cout << result_matrix[i] << endl;
+    if(result_matrix[i] < 1.0) throw invalid_argument("No Result Value should be below 0!");
   }
 
   long duration = duration_cast<microseconds>( end - begin ).count() * 1000;
