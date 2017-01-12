@@ -60,18 +60,21 @@ int main( int argc, char** argv)
 
     double mean = calcMean(results);
     double stdev = calcStdev(results);
-    cout << size << ": avg=" << mean << "; stdev=" << stdev << endl;
 
     mean = calcMean(buffer_a);
     stdev = calcStdev(buffer_a);
-    cout << "Buffer A: avg=" << mean << "; stdev=" << stdev << endl;
 
     mean = calcMean(buffer_b);
     stdev = calcStdev(buffer_b);
-    cout << "Buffer B: avg=" << mean << "; stdev=" << stdev << endl;
 
     mean = calcMean(buffer_c);
     stdev = calcStdev(buffer_c);
-    cout << "Buffer C: avg=" << mean << "; stdev=" << stdev << endl;
+
+    cout << size;
+    cout << " Buffer A: avg=" << mean << "; stdev=" << stdev;
+    cout << " Buffer B: avg=" << mean << "; stdev=" << stdev;
+    cout << " Buffer C: avg=" << mean << "; stdev=" << stdev;
+    cout << " Total: avg=" << mean << "; stdev=" << stdev << endl;
+
   }
 }
