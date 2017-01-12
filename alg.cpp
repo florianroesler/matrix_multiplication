@@ -26,8 +26,6 @@ float randMToN(float M, float N)
 
 const char *kernelSource =                                      "\n" \
 "#pragma OPENCL EXTENSION cl_khr_fp64 : enable                    \n" \
-"#pragma OPENCL EXTENSION cl_intel_printf : enable                \n" \
-"#pragma OPENCL EXTENSION cl_amd_printf : enable               \n" \
 "__kernel void matrix_multiplication(  __global float *a,                       \n" \
 "                       __global float *b,                       \n" \
 "                       __global float *c,                       \n" \
@@ -155,9 +153,9 @@ void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int 
   clReleaseCommandQueue(queue);
   clReleaseContext(context);
 
-  for(int i = 0; i<size;i++){
-    if(result_matrix[i] < 1.0) throw invalid_argument("No Result Value should be below 0!");
-  }
+  // for(int i = 0; i<size;i++){
+  //   if(result_matrix[i] < 1.0) throw invalid_argument("No Result Value should be below 0!");
+  // }
 
   long duration = duration_cast<microseconds>( end - begin ).count() * 1000;
 
