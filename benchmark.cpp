@@ -53,16 +53,19 @@ int main( int argc, char** argv)
     vector<float> buffer_b;
     vector<float> buffer_c;
 
-    float* array = generate(size, size);
+    float* array_a = generate(size, size);
+    float* array_b = generate(size, size);
+
     for(int i=0; i<iterations; i++){
       double *r = new double[4];
-      executeKernel(use_gpu, array, array, size, r);
+      executeKernel(use_gpu, array_a, array_b, size, r);
       results.push_back(r[0]);
       buffer_a.push_back(r[1]);
       buffer_b.push_back(r[2]);
       buffer_c.push_back(r[3]);
     }
-    free(array);
+    free(array_a);
+    free(array_b);
 
     cout << size;
 
