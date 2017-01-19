@@ -25,21 +25,36 @@ float randMToN(float M, float N)
 }
 
 const char *kernelSource =                                      "\n" \
+"typedef struct This_s{\n" \
+"   __global float *a;\n" \
+"   __global float *b;\n" \
+"   __global float *c;\n" \
+"   int size;\n" \
+"}This;\n" \
 "#pragma OPENCL EXTENSION cl_khr_fp64 : enable                    \n" \
 "__kernel void matrix_multiplication(__global float *a,                       \n" \
 "                       __global float *b,                       \n" \
 "                       __global float *c,                       \n" \
 "                       const unsigned int size)                   \n" \
 "{                                                      \n" \
+"This thisStruct;\n" \
+"This* this=&thisStruct;\n" \
+"this->a = a;\n" \
+"this->size = size;\n" \
+"this->b = b;\n" \
+"this->c = c;\n" \
+"{\n" \
+
 "    int y = get_global_id(0);                                  \n" \
 "    int x = get_global_id(1);                                  \n" \
 "    float sum = 0; \n"\
-"    for(int i = 0; i < size; i++){ \n"\
-"       sum += a[y * size + i] * b[x * size + i]; \n"\
+"    for(int i = 0; i < this->size; i++){ \n"\
+"       sum += this->a[y * this->size + i] * this->b[x * this->size + i]; \n"\
 "    }  \n"\
 "    //printf(\"%d %f \\n\", width_b * y + x, sum); \n"\
-"    c[y * size + x] = sum;                \n" \
+"    this->c[y * this->size + x] = sum;                \n" \
 "}                                                               \n" \
+"}\n" \
                                                                 "\n" ;
 
 void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int size, double *results){
