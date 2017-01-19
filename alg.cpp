@@ -26,20 +26,19 @@ float randMToN(float M, float N)
 
 const char *kernelSource =                                      "\n" \
 "#pragma OPENCL EXTENSION cl_khr_fp64 : enable                    \n" \
-"__kernel void matrix_multiplication(  __global float *a,                       \n" \
+"__kernel void matrix_multiplication(__global float *a,                       \n" \
 "                       __global float *b,                       \n" \
 "                       __global float *c,                       \n" \
-"                       const unsigned int width_a,                   \n" \
-"                       const unsigned int width_b)                    \n" \
+"                       const unsigned int size)                   \n" \
 "{                                                      \n" \
 "    int y = get_global_id(0);                                  \n" \
 "    int x = get_global_id(1);                                  \n" \
 "    float sum = 0; \n"\
-"    for(int index = 0; index < width_a; index++){ \n"\
-"       sum += a[y * width_a + index] * b[index * width_b + x]; \n"\
+"    for(int i = 0; i < size; i++){ \n"\
+"       sum += a[y * size + i] * b[x * size + i]; \n"\
 "    }  \n"\
 "    //printf(\"%d %f \\n\", width_b * y + x, sum); \n"\
-"    c[width_b * y + x] = sum;                \n" \
+"    c[y * size + x] = sum;                \n" \
 "}                                                               \n" \
                                                                 "\n" ;
 
@@ -128,11 +127,12 @@ void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int 
   clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_b);
   clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_c);
   clSetKernelArg(kernel, 3, sizeof(unsigned int), &size);
-  clSetKernelArg(kernel, 4, sizeof(unsigned int), &size);
 
   size_t y_range = size;
   size_t x_range = size;
+
   size_t global[2] = {y_range, x_range};
+  size_t local[2] = {100, 1};
 
   // Execute the kernel over the entire range of the data set
   clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, NULL, 0, NULL, NULL);
@@ -153,9 +153,11 @@ void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int 
   clReleaseCommandQueue(queue);
   clReleaseContext(context);
 
-  // for(int i = 0; i<size;i++){
-  //   if(result_matrix[i] < 1.0) throw invalid_argument("No Result Value should be below 0!");
+  // for(int i = 0; i<size * size;i++){
+  //   cout << result_matrix[i] << " ";
+  //   if(result_matrix[i] < 1.0) throw invalid_argument("No Result Value should be below 1!");
   // }
+  // cout << endl;
 
   long duration = duration_cast<microseconds>( end - begin ).count() * 1000;
 

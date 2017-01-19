@@ -41,6 +41,12 @@ int main( int argc, char** argv)
 
   bool use_gpu = atoi(argv[5]) == 1;
 
+  // float a[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  // float b[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+  // double *r = new double[4];
+  // executeKernel(use_gpu, a, b, 4, r);
+  // return 1;
+
   for(int size=min_size; size<=max_size; size+=step_size){
     vector<float> results;
     vector<float> buffer_a;
