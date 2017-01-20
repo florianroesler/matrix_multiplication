@@ -25,7 +25,7 @@ float randMToN(float M, float N)
 }
 
 char *readSource(){
-  FILE *f = fopen("kernel.cl", "rb");
+  FILE *f = fopen("slow.cl", "rb");
   fseek(f, 0, SEEK_END);
   long fsize = ftell(f);
   fseek(f, 0, SEEK_SET);
