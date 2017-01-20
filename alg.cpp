@@ -24,25 +24,22 @@ float randMToN(float M, float N)
     return M + (rand() / ( RAND_MAX / (N-M) ) ) ;
 }
 
-const char *kernelSource =                                      "\n" \
-"#pragma OPENCL EXTENSION cl_khr_fp64 : enable                    \n" \
-"__kernel void matrix_multiplication(__global float *a,                       \n" \
-"                       __global float *b,                       \n" \
-"                       __global float *c,                       \n" \
-"                       const unsigned int size)                   \n" \
-"{                                                      \n" \
-"    int y = get_global_id(0);                                  \n" \
-"    int x = get_global_id(1);                                  \n" \
-"    float sum = 0; \n"\
-"    for(int i = 0; i < size; i++){ \n"\
-"       sum += a[y * size + i] * b[x * size + i]; \n"\
-"    }  \n"\
-"    //printf(\"%d %f \\n\", width_b * y + x, sum); \n"\
-"    c[y * size + x] = sum;                \n" \
-"}                                                               \n" \
-                                                                "\n" ;
+char *readSource(){
+  FILE *f = fopen("kernel.cl", "rb");
+  fseek(f, 0, SEEK_END);
+  long fsize = ftell(f);
+  fseek(f, 0, SEEK_SET);
+
+  char *string = (char *)malloc(fsize + 1);
+  fread(string, fsize, 1, f);
+  fclose(f);
+
+  string[fsize] = 0;
+  return string;
+}
 
 void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int size, double *results){
+  const char *kernelSource = readSource();
   // Device input buffers
   cl_mem d_a;
   cl_mem d_b;
@@ -132,7 +129,6 @@ void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int 
   size_t x_range = size;
 
   size_t global[2] = {y_range, x_range};
-  size_t local[2] = {100, 1};
 
   // Execute the kernel over the entire range of the data set
   clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, NULL, 0, NULL, NULL);
