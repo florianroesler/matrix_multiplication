@@ -75,6 +75,9 @@ void executeKernel(bool use_gpu, float* matrix_a, float* matrix_b, unsigned int 
   cl_device_type device_type = use_gpu ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU;
   clGetDeviceIDs(cpPlatform, device_type, 2, &device_id, NULL);
 
+  cl_ulong resolution;
+  clGetDeviceInfo(device_id, CL_DEVICE_PROFILING_TIMER_RESOLUTION, sizeof(cl_ulong), &resolution, NULL);
+  cout << "Measurement Resolution: " << resolution << " nanoseconds"  << endl;
   // Create a context
   context = clCreateContext(0, 1, &device_id, NULL, NULL, NULL);
 
